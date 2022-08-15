@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:test/pages/tabs.dart';
@@ -18,14 +17,27 @@ void main() async {
   ));
 
   
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
+
+  const MyApp({Key? key}) : super(key: key);
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  ThemeData themeData = ThemeData(
+    primaryColor: Colors.black,    
+  );
+
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: TabsPage(),
+    return MaterialApp(
+      home: const TabsPage(),
+      theme: themeData,
     );
   }
 }

@@ -1,3 +1,6 @@
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+
 class LaunchClass  {
 
   String? id;
@@ -5,6 +8,7 @@ class LaunchClass  {
   int? flightNumber;
   String? dateUtc;
   bool? upcoming;
+  bool? success;
   String? rocketId;
   String? details;
   String? smallImage;
@@ -16,6 +20,7 @@ class LaunchClass  {
     this.flightNumber,
     this.dateUtc,
     this.upcoming,
+    this.success,
     this.rocketId,
     this.details,
     this.smallImage,
@@ -29,6 +34,7 @@ class LaunchClass  {
       flightNumber: json['flight_number'],
       dateUtc: json['date_utc'],
       upcoming: json['upcoming'],
+      success: json['success'],
       rocketId: json['rocket'],
       details: json['details'],
       smallImage: json['links']?['patch']?['small'],
@@ -37,11 +43,63 @@ class LaunchClass  {
   }
 
   String getSmallImage() {
-    return smallImage ?? "";
+    return smallImage ?? 'https://via.placeholder.com/300';
   }
 
   String getName() {
     return name ?? "";
+  }
+
+  IconData getLaunchIcon() {
+    if (upcoming != false) {
+      return Icons.rocket;
+    }
+    switch (success) {
+      case true:
+        return Icons.check;
+      case false:
+        return Icons.clear;
+      default:
+        return Icons.check;
+    }
+  }
+
+  Color getLaunchColor() {
+    if (upcoming != false) {
+      return Colors.black;
+    }
+    switch (success) {
+      case true:
+        return Colors.green;
+      case false:
+        return Colors.red;
+      default:
+        return Colors.green;
+    }
+  }
+
+  bool hasSuccessLaunch() {
+    return success ?? false;
+  }
+
+  bool isUpcomming() {
+    return upcoming ?? false;
+  }
+
+  String getDate() {
+    if (dateUtc != null) {
+      DateTime parsedDate = DateTime.parse(dateUtc!);
+      DateTime date = DateTime.utc(
+        parsedDate.year,
+        parsedDate.month,
+        parsedDate.day,
+        parsedDate.hour,
+        parsedDate.minute,
+        parsedDate.second
+      ).toLocal();
+      return DateFormat("dd-MMM-yyyy HH:m").format(date);
+    }
+    return "";
   }
 
   

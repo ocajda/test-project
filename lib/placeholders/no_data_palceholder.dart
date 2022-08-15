@@ -8,11 +8,11 @@ class PlaceholderNoData extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.symmetric(
+      padding: const EdgeInsets.symmetric(
         horizontal: 16,
         vertical: 24,
       ),
-      child: Text(
+      child: const Text(
         "No available data",
         style: TextStyle(
           color: Colors.black
