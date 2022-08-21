@@ -97,7 +97,7 @@ class LaunchClass  {
         parsedDate.minute,
         parsedDate.second
       ).toLocal();
-      return DateFormat("dd-MMM-yyyy HH:m").format(date);
+      return DateFormat("dd-MMM-yyyy HH:mm").format(date);
     }
     return "";
   }

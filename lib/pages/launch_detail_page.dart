@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:test/classes/launch_class.dart';
-import 'package:test/components/tiles/launch_tile.dart';
-import 'package:test/placeholders/no_data_palceholder.dart';
-import '../components/deviders/list_devider.dart';
-import '../placeholders/loading_placeholder.dart';
 
 class LaunchDetailPage extends StatefulWidget {
   final LaunchClass launch;
@@ -31,7 +27,9 @@ class _LaunchDetailPageState extends State<LaunchDetailPage> {
       appBar: AppBar(
         title: Text(widget.launch.getName()),
       ),
-      body: Container()
+      body: Container(
+        child: Text(widget.launch.name!)
+      )
     );
   }
 }

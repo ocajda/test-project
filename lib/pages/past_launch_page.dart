@@ -1,9 +1,12 @@
 import 'dart:async';
+import 'package:collection/collection.dart';
 
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:test/classes/launch_class.dart';
+import 'package:test/classes/rocket_class.dart';
 import 'package:test/components/tiles/launch_tile.dart';
 import 'package:test/pages/launch_detail_page.dart';
 import 'package:test/placeholders/no_data_palceholder.dart';
@@ -31,9 +34,12 @@ class _PastLaunchPageState extends State<PastLaunchPage> {
   final ScrollController _scrollController = ScrollController();
   Timer? _debounce;
   DateTimeRange? dateRange;
+  RocketClass? selectedRocket;
+  List<RocketClass>? rockets;
 
   @override
   void initState() {
+    loadRocketsToFilter();
     preloadLaunches();
     _scrollController.addListener(() async {
       if (_scrollController.position.pixels >=
@@ -44,7 +50,8 @@ class _PastLaunchPageState extends State<PastLaunchPage> {
               page, 
               searchQueryController.value.text, 
               dateRange?.start, 
-              dateRange?.end
+              dateRange?.end,
+              selectedRocket
             );
             if (newPage != null) {
               List<LaunchClass> loadedLaunch = obsLaunches.value;
@@ -62,7 +69,8 @@ class _PastLaunchPageState extends State<PastLaunchPage> {
             null, 
             searchQueryController.value.text, 
             dateRange?.start, 
-            dateRange?.end
+            dateRange?.end,
+            selectedRocket
           );
           if (newPage != null) {
             page = newPage;
@@ -74,25 +82,32 @@ class _PastLaunchPageState extends State<PastLaunchPage> {
     super.initState();
   }
 
-  preloadLaunches() async {
-    if (firstOpen) {
-      final prefs = await SharedPreferences.getInstance();
-      String? startDateString = prefs.getString('startDate');
-      String? endDateString = prefs.getString('endDate');
-      if (startDateString != null && endDateString != null) {
-        dateRange = DateTimeRange(
-          start: DateTime.parse(startDateString), 
-          end: DateTime.parse(endDateString), 
-        );
-      }
-      
-      firstOpen = false;
+  loadRocketsToFilter() async {
+    rockets = await getAllRocketsForFilter();
+    final prefs = await SharedPreferences.getInstance();
+    String? startDateString = prefs.getString('startDate');
+    String? endDateString = prefs.getString('endDate');
+    String? rocketFilterStirng = prefs.getString('selectedRocked');
+    if (startDateString != null && endDateString != null) {
+      dateRange = DateTimeRange(
+        start: DateTime.parse(startDateString), 
+        end: DateTime.parse(endDateString), 
+      );
     }
+    if (rocketFilterStirng != null) {
+      selectedRocket = rockets!.firstWhereOrNull((rocket) => 
+        rocket.id == rocketFilterStirng);
+    }
+    
+  }
+
+  preloadLaunches() async {
     PageClass? newPage = await getPastLaunches(
       null, 
       searchQueryController.value.text, 
       dateRange?.start, 
-      dateRange?.end
+      dateRange?.end,
+      selectedRocket
     );
     if (newPage != null) {
       page = newPage;
@@ -121,15 +136,99 @@ class _PastLaunchPageState extends State<PastLaunchPage> {
       saveText: 'Done',
     );
     if (result != null) {
-      // Rebuild the UI
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('startDate', result.start.toString());
-      await prefs.setString('endDate', result.end.toString());
       setState(() {
         dateRange = result;
       });
-      preloadLaunches();
     }
+  }
+
+  openFilterDialog(BuildContext context) {
+    DateTimeRange? range = dateRange;
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Launch filters"),
+          content: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ListTile(
+                    onTap: () async {
+                      await openRangeDatepicker();
+                      setState(() {
+                       range = dateRange;
+                      });
+                    },
+                    title: const Text("Date of flight"),
+                    subtitle: Text(
+                      range != null 
+                        ? "From ${DateFormat("d. MMM yyyy")
+                          .format(range!.start)} to ${DateFormat("d. MMM yyyy")
+                          .format(range!.end)}"
+                        : "Select date"
+                    ),
+                  ),
+                  DropdownButton<RocketClass>(
+                    value: selectedRocket,
+                    isDense: true,
+                    isExpanded: true,
+                    hint: const  Text("Select rocket"),
+                    onChanged: (RocketClass? newValue) {
+                      setState(() {
+                        selectedRocket = newValue!;
+                      });
+                    },
+                    items: rockets!
+                        .map<DropdownMenuItem<RocketClass>>((RocketClass rocket) {
+                      return DropdownMenuItem<RocketClass>(
+                        value: rocket,
+                        child: Text(rocket.name!),
+                      );
+                    }).toList(),
+                  )
+                ],
+              );
+            }
+          ),
+          actions: [
+            TextButton(
+              onPressed:  resetFilter,
+              child: const Text("Reset filter"),
+            ),
+            TextButton(
+              onPressed: filterResults,
+              child: const Text("Use filter"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  resetFilter() async {
+    Navigator.of(context).pop();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('startDate');
+    await prefs.remove('endDate');
+    await prefs.remove('selectedRocked');
+    dateRange = null;
+    selectedRocket = null;
+    preloadLaunches();
+  }
+
+  filterResults() async {
+    Navigator.of(context).pop();
+    final prefs = await SharedPreferences.getInstance();
+    if (dateRange != null) {
+      await prefs.setString('startDate', dateRange!.start.toString());
+      await prefs.setString('endDate', dateRange!.end.toString());
+    }
+    if (selectedRocket != null) {
+     await prefs.setString('selectedRocked', selectedRocket!.id!);
+    }
+    preloadLaunches();
   }
 
   @override
@@ -145,7 +244,7 @@ class _PastLaunchPageState extends State<PastLaunchPage> {
             )
           ),
           IconButton(
-            onPressed: openRangeDatepicker, 
+            onPressed: () => openFilterDialog(context), 
             icon: const Icon(
               Icons.filter_list
             )
