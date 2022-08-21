@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:test/components/deviders/list_devider.dart';
+import 'package:test/pages/launch_detail_page.dart';
 
 import '../classes/launch_class.dart';
 import '../components/tiles/launch_tile.dart';
@@ -7,11 +8,22 @@ import '../placeholders/loading_placeholder.dart';
 import '../placeholders/no_data_palceholder.dart';
 import '../services/collector.dart';
 
-class UpcomingLaunchPage extends StatelessWidget {
+class UpcomingLaunchPage extends StatefulWidget {
   const UpcomingLaunchPage({Key? key}) : super(key: key);
 
-  openDetail(LaunchClass launch) {
+  @override
+  State<UpcomingLaunchPage> createState() => _UpcomingLaunchPageState();
+}
 
+class _UpcomingLaunchPageState extends State<UpcomingLaunchPage> {
+  openDetail(LaunchClass launch) {
+    Navigator.of(context, rootNavigator: true).push(
+      MaterialPageRoute(
+        builder: (context) => LaunchDetailPage(
+          launch: launch
+        ),
+      ),
+    );
   }
 
   @override

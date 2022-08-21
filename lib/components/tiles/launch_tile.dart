@@ -20,6 +20,7 @@ class LaunchTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
+      onTap: onTap,
       title: Text(
         launch.getName(),
       ),

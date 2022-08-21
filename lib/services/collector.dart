@@ -27,22 +27,40 @@ Future<List<LaunchClass>?> getUpcomingLaunches() async {
   }
 }
 
-Future<PageClass?> getPastLaunches(PageClass? page) async {
+Future<PageClass?> getPastLaunches(
+  PageClass? page, 
+  String? searchText, 
+  DateTime? startDate, 
+  DateTime? endDate
+) async {
   // Get all past rocket launches.
   var url = Uri.https(apiUrl, 'v5/launches/query');
   try {
-    var response = await http.post(url, body: jsonEncode({
-      "query":{
-          "upcoming":false
+    Map data = {
+      "query": {
+        "upcoming":false,
+        "date_utc": {
+          "\$gte": startDate != null ? startDate.toString() : "2000-01-01T00:00:00.000Z",
+          "\$lte": endDate != null ? endDate.toString() : DateTime.now().toString()
+        },
+        "rocket": {
+          "id": "5e9d0d95eda69973a809d1s"
+        }
       },
       "options":{
-          "page":page?.nextPage ?? 0,
-          "limit": 20,
-          "sort": {
-            "date_utc": "desc"
-          },
-        }
-      }),
+        "page":page?.nextPage ?? 0,
+        "limit": 20,
+        "sort": {
+          "date_utc": "desc"
+        },
+      }
+    };
+    if (searchText != null && searchText != '') {
+      data["query"]["\$text"] = {
+        "\$search": searchText,
+      };
+    }
+    var response = await http.post(url, body: jsonEncode(data),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
