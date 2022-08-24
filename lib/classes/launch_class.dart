@@ -46,8 +46,16 @@ class LaunchClass  {
     return smallImage ?? 'https://via.placeholder.com/300';
   }
 
+  String getLargeImage() {
+    return largeImage ?? 'https://via.placeholder.com/300';
+  }
+
   String getName() {
     return name ?? "";
+  }
+
+  String getDescription() {
+    return details ?? "";
   }
 
   IconData getLaunchIcon() {
@@ -64,6 +72,20 @@ class LaunchClass  {
     }
   }
 
+  String getLaunchResult() {
+    if (upcoming != false) {
+      return "";
+    }
+    switch (success) {
+      case true:
+        return "Success";
+      case false:
+        return "Fail";
+      default:
+        return "Success";
+    }
+  }
+
   Color getLaunchColor() {
     if (upcoming != false) {
       return Colors.black;
@@ -76,6 +98,10 @@ class LaunchClass  {
       default:
         return Colors.green;
     }
+  }
+
+  String getFlightNumber() {
+    return "${flightNumber ?? ''}";
   }
 
   bool hasSuccessLaunch() {

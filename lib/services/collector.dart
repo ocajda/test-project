@@ -8,8 +8,10 @@ import '../classes/page_class.dart';
 
 String apiUrl = 'api.spacexdata.com';
 
+List<RocketClass>? rockets;
+
 Future<List<RocketClass>?> getAllRocketsForFilter() async {
-  // Get all rockets.
+  // Get all rockets for filter and details.
   var url = Uri.https(apiUrl, 'v4/rockets');
   try {
     var response = await http.get(url);
@@ -18,6 +20,7 @@ Future<List<RocketClass>?> getAllRocketsForFilter() async {
       List<RocketClass> list = jsonRocketData 
           .map((launch) => RocketClass.fromJson(launch))
           .toList();
+      rockets = list;
       return list;
     } else {
       return null;
@@ -54,7 +57,7 @@ Future<PageClass?> getPastLaunches(
   DateTime? endDate,
   RocketClass? rocket
 ) async {
-  // Get all past rocket launches.
+  // Get all past rocket launches by filter parameters.
   var url = Uri.https(apiUrl, 'v5/launches/query');
   try {
     Map data = {

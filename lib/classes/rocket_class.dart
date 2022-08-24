@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 class RocketClass  {
 
@@ -39,6 +37,30 @@ class RocketClass  {
           ? (json["flickr_images"] as List<dynamic>).map((image) => image.toString()).toList()
           : null,
     );
+  }
+
+  String getName() {
+    return name ?? "";
+  }
+
+  String getCountry() {
+    return country ?? "";
+  }
+
+  String getDescription() {
+    return description ?? "";
+  }
+
+  String getCompany() {
+    return company ?? "";
+  }
+
+  String getFirstFlight() {
+    return firstFlight ?? "";
+  }
+
+  bool hasGallery() {
+    return images != null;
   }
   
 

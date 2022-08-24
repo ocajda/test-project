@@ -39,8 +39,8 @@ class _PastLaunchPageState extends State<PastLaunchPage> {
 
   @override
   void initState() {
-    loadRocketsToFilter();
-    preloadLaunches();
+    loadDataToFilter();
+    
     _scrollController.addListener(() async {
       if (_scrollController.position.pixels >=
           _scrollController.position.maxScrollExtent * 0.8 
@@ -82,7 +82,7 @@ class _PastLaunchPageState extends State<PastLaunchPage> {
     super.initState();
   }
 
-  loadRocketsToFilter() async {
+  loadDataToFilter() async {
     rockets = await getAllRocketsForFilter();
     final prefs = await SharedPreferences.getInstance();
     String? startDateString = prefs.getString('startDate');
@@ -98,6 +98,7 @@ class _PastLaunchPageState extends State<PastLaunchPage> {
       selectedRocket = rockets!.firstWhereOrNull((rocket) => 
         rocket.id == rocketFilterStirng);
     }
+    preloadLaunches();
     
   }
 
